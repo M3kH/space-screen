@@ -4,6 +4,18 @@ var spacescreen = require('../index.js');
 var configFile = process.argv[2];
 var fs = require('fs');
 var path = require('path');
-var json = JSON.parse(fs.readFileSync(path.resolve(process.env.PWD, configFile), { encoding: 'utf8' }));
+var homePath = process.env[(process.platform=='win32') ? 'USERPROFILE' : 'HOME'];
 
-spacescreen(json);
+
+(function(){
+  var filePath = !configFile ? path.resolve(homePath, '.space-screen') : path.resolve(process.env.PWD, configFile);
+
+  try{
+    var json = JSON.parse(fs.readFileSync(filePath, { encoding: 'utf8' }));
+  }catch(e){
+    console.log("We couldn't find the right configuration file, we were looking for: \n"+filePath);
+    return false;
+  }
+
+  spacescreen(json);
+})();

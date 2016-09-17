@@ -1,18 +1,17 @@
-var _ = require('underscore'),
-    temp = require('temp'),
-    fs = require('fs'),
-    child_process = require('child_process'),
-    json = JSON.parse(fs.readFileSync('./example.conf', { encoding: 'utf8' })),
-    template = _.template(fs.readFileSync('./profile.tpl', { encoding: 'utf8' }));
+var temp = require('temp');
+var fs = require('fs');
+var child_process = require('child_process');
+var path = require('path');
+var _ = require('underscore');
+var template = _.template(fs.readFileSync('./profile.tpl', { encoding: 'utf8' }));
 
-
-function createTemplate( json ){
+function createScreenTempTpl( json, cb ){
   temp.open('spaceconf', function(err, info) {
     if (err) throw err;
-    fs.write(info.fd, template(json));
+    fs.write(info.fd, template({spaces: json}));
     fs.close(info.fd, function(err) {
       if (err) throw err;
-      spawnScreen(info.path);
+      cb(info.path);
     });
   });
 }
@@ -23,5 +22,5 @@ function spawnScreen( path ){
 }
 
 module.exports = function( config ){
-  createTemplate(config);
+  createScreenTempTpl(config, spawnScreen);
 };
